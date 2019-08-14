@@ -34,7 +34,6 @@ usage () {
 getenv() {
   # determine the environment from the hostname
   shortenv=$(hostname -s | sed -e 's/lcp-canvas-[am]//' | sed -e 's/[0-9]\+//')
-  echo "shortenv $shortenv"
   case "$shortenv" in
     p)
       CANVAS_ENV="production"
@@ -56,7 +55,7 @@ preflight() {
   # check if the release exists
   echo "Performing Pre-flight Checks"
   printf "Release tarball exists? "
-  if [ -f /usr/local/canvas/deploy-release-$CANVAS_ENV ]; then
+  if [ -f "/usr/local/canvas/deploy-release-$CANVAS_ENV/canvas.tar" ]; then
     printf "yes\n"
   else
     printf "no\n"
