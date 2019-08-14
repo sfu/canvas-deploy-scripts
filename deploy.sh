@@ -55,7 +55,7 @@ preflight() {
   # check if the release exists
   echo "Performing Pre-flight Checks"
   printf "Release tarball exists? "
-  if [ -f "/usr/local/canvas/deploy-release-$CANVAS_ENV/canvas.tar" ]; then
+  if [ -f "/usr/local/canvas/deploy-release-$CANVAS_ENV/$RELEASE/canvas.tar" ]; then
     printf "yes\n"
   else
     printf "no\n"
