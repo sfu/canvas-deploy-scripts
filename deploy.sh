@@ -20,6 +20,7 @@ set -o pipefail
 FORCE=false
 CANVAS_ROOT=/var/rails/canvas/releases
 CANVAS_ENV=
+RELEASE=
 
 usage () {
   echo "usage: $(basename "$0") -e <environment> -r <path> [-f]"
@@ -102,6 +103,11 @@ while getopts ':fhr:' OPTION ; do
     ;;
   esac
 done
+
+if [ -z "$RELEASE" ] ; then
+  usage
+  exit 1
+fi
 
 # echo "Deploying Canvas release to $CANVAS_ROOT/$RELEASE"
 
