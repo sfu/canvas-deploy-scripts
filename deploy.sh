@@ -90,6 +90,10 @@ while getopts ':fhr:' OPTION ; do
       exit 0
     ;;
     r)
+      if [ -z "$OPTARG" ] ; then
+        usage
+        exit 1
+      fi
       RELEASE="$OPTARG"
     ;;
     ?)
@@ -99,6 +103,6 @@ while getopts ':fhr:' OPTION ; do
   esac
 done
 
-echo "Deploying Canvas release to $CANVAS_ROOT/$RELEASE"
+# echo "Deploying Canvas release to $CANVAS_ROOT/$RELEASE"
 
 preflight
