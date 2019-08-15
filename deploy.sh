@@ -36,6 +36,25 @@ usage () {
   echo -e "    -h           Show this help, then exit\n"
 }
 
+is_primary_managmeent_node() {
+  # determine if a node is the primary managment node from its hostname
+  # the primary node is the one with 01 in the hostname
+  local short_node
+  short_node=$(hostname -s | sed -e 's/lcp-canvas-//')
+  local node_type=${short_node:0:1}
+  local node_num=${short_node:2}
+  if [ "$node_type" = "m" -a "$node_num" = "01" ]; then
+    IS_PRIMARY_MANAGEMENT_NODE=true
+  fi
+}
+
+run_on_primary_management_node() {
+  if [ $IS_PRIMARY_MANAGEMENT_NODE = true ] ; then
+    $1
+  fi
+}
+
+
 getenv() {
   # determine the environment from the hostname
   shortenv=$(hostname -s | sed -e 's/lcp-canvas-[am]//' | sed -e 's/[0-9]\+//')
