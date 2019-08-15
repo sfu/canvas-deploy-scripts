@@ -56,9 +56,14 @@ run_on_primary_management_node() {
 
 
 getenv() {
+  is_primary_managmeent_node
+
   # determine the environment from the hostname
-  shortenv=$(hostname -s | sed -e 's/lcp-canvas-[am]//' | sed -e 's/[0-9]\+//')
-  case "$shortenv" in
+  SHORTENV=$(hostname -s | sed -e 's/lcp-canvas-[am]//' | sed -e 's/[0-9]\+//')
+
+  # determine the role from the hostname
+
+  case "$SHORTENV" in
     p)
       CANVAS_ENV="production"
     ;;
@@ -72,13 +77,15 @@ getenv() {
       echo "ERROR: could not determine Canvas environment from hostname. Are you running on a Canvas server?"
       exit 1
   esac
+  RELEASE_TARBALL="/usr/local/canvas/deploy-release-$CANVAS_ENV/$RELEASE/$TARBALL"
 }
 
 preflight() {
   getenv
   # check if the release exists
   echo "Performing preflight checks"
-  printf "Release tarball exists? "
+  echo "Is the primary management node? $IS_PRIMARY_MANAGEMENT_NODE"
+  printf "Release tarball exists (%s)? " "$RELEASE_TARBALL"
   if [ -f "/usr/local/canvas/deploy-release-$CANVAS_ENV/$RELEASE/canvas.tar" ]; then
     printf "yes\n"
   else
@@ -90,23 +97,58 @@ preflight() {
   # check if release directory exists; bail if true && !FORCE
   printf "Release directory exists? "
   if [ -d "$CANVAS_ROOT"/"$RELEASE" ] ; then
-    if [ ! $FORCE ] ; then
+    if [ "$FORCE" = false ] ; then
       printf "yes\n"
-      echo "Aborting - release directory already exists"
+      echo "Aborting - release directory ($INSTALL_DIR) already exists"
       exit 1
     else
-      printf "yes - but using force mode"
+      printf "yes - but using force mode\n"
+      printf "Removing previous release installation directory: "
+      rm -rf $INSTALL_DIR
+      printf "done\n"
     fi
   else
     printf "no\n"
   fi
 
-  echo "Preflight checks complete, proceeding"
+  echo -e "Preflight checks complete, proceeding"
 }
 
 create_release_dir() {
-  echo "hi"
+  printf "Creating release directory (%s): " "$INSTALL_DIR"
+  mkdir $INSTALL_DIR
+  printf "done\n"
 }
+
+extract_release() {
+  printf "Extracting release tarball to relase directory: "
+  tar -xf $RELEASE_TARBALL -C $INSTALL_DIR --owner="$ID" --group="$ID"
+  printf "done\n"
+}
+
+copy_config() {
+  printf "Copying config files from templates: "
+  sudo /usr/local/canvas/bin/canvasconfig -r $RELEASE
+  printf "done\n"
+}
+
+symlink_canvas_data() {
+  # Create a symlink to /mnt/data in the Canvas install directory
+  printf "Symlinking /mnt/data: "
+  mkdir -p $INSTALL_DIR/mnt/data
+  ln -s /mnt/data/canvasfiles $INSTALL_DIR/mnt/data/canvasfiles
+  printf "done\n"
+}
+
+# rebuild_brand_configs() {}
+
+# symlink_brandable_css() {}
+
+# cleanup_brandable_css() {}
+
+# run_predeploy_migrations() {}
+
+# run_migrations() {}
 
 while getopts ':fhr:' OPTION ; do
   case "$OPTION" in
@@ -123,6 +165,7 @@ while getopts ':fhr:' OPTION ; do
         exit 1
       fi
       RELEASE="$OPTARG"
+      INSTALL_DIR="$CANVAS_ROOT"/"$RELEASE"
     ;;
     ?)
       usage
@@ -139,3 +182,8 @@ fi
 # echo "Deploying Canvas release to $CANVAS_ROOT/$RELEASE"
 
 preflight
+create_release_dir
+extract_release
+copy_config
+symlink_canvas_data
+
