@@ -140,7 +140,31 @@ symlink_canvas_data() {
   printf "done\n"
 }
 
-# rebuild_brand_configs() {}
+rebuild_brand_configs() {
+  set +e
+  printf "Rebuilding brand configs: "
+  local tmpfile
+  local returnval
+  tmpfile=$(mktemp)
+  (cd $INSTALL_DIR && RAILS_ENV=production bundle exec rake brand_configs:generate_and_upload_all > "$tmpfile" 2>&1)
+  returnval=$?
+  if [ $returnval -eq 0 ] ; then     
+    printf "done\n"
+  else 
+    printf "ERROR:\n"
+    cat "$tmpfile"
+    exit $returnval
+  fi
+  set -e
+  rm -f "$tmpfile"
+}
+
+copy_brandable_css() {
+  printf "Copying brandable_css: "
+  mkdir -p /mnt/data/brandable_css && \
+  cp -r "$INSTALL_DIR/public/dist/brandable_css" "/mnt/data/brandable_css/$RELEASE"
+  printf "done\n"
+}
 
 # symlink_brandable_css() {}
 
@@ -186,4 +210,5 @@ create_release_dir
 extract_release
 copy_config
 symlink_canvas_data
-
+run_on_primary_management_node rebuild_brand_configs
+run_on_primary_management_node copy_brandable_css
