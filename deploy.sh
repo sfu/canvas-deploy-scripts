@@ -18,9 +18,14 @@ set -o pipefail
 
 # Default options
 FORCE=false
+RELEASE_TARBALL=
 CANVAS_ROOT=/var/rails/canvas/releases
 CANVAS_ENV=
 RELEASE=
+INSTALL_DIR=
+TARBALL=canvas.tar
+ID=$(id -u canvasuser)
+IS_PRIMARY_MANAGEMENT_NODE=false
 
 usage () {
   echo "usage: $(basename "$0") -e <environment> -r <path> [-f]"
