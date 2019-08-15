@@ -53,7 +53,7 @@ getenv() {
 preflight() {
   getenv
   # check if the release exists
-  echo "Performing Pre-flight Checks"
+  echo "Performing preflight checks"
   printf "Release tarball exists? "
   if [ -f "/usr/local/canvas/deploy-release-$CANVAS_ENV/$RELEASE/canvas.tar" ]; then
     printf "yes\n"
@@ -64,7 +64,7 @@ preflight() {
   fi
   
   # check if release directory exists; bail if true && !FORCE
-  echo "Release directory exists? "
+  printf "Release directory exists? "
   if [ -d "$CANVAS_ROOT"/"$RELEASE" ] ; then
     if [ ! $FORCE ] ; then
       printf "yes\n"
@@ -73,7 +73,11 @@ preflight() {
     else
       printf "yes - but using force mode"
     fi
+  else
+    printf "no\n"
   fi
+
+  echo "Preflight checks complete, proceeding"
 }
 
 create_release_dir() {
