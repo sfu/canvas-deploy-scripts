@@ -166,7 +166,12 @@ copy_brandable_css() {
   printf "done\n"
 }
 
-# symlink_brandable_css() {}
+symlink_brandable_css() {
+  printf "Symlinking brandable_css: "
+  rm -rf "$INSTALL_DIR}/public/dist/brandable_css"
+  ln -s "/mnt/data/brandable_css/$RELEASE" "$INSTALL_DIR/public/dist/brandable_css"
+  printf "done\n"
+}
 
 # cleanup_brandable_css() {}
 
@@ -212,3 +217,4 @@ copy_config
 symlink_canvas_data
 run_on_primary_management_node rebuild_brand_configs
 run_on_primary_management_node copy_brandable_css
+symlink_brandable_css
