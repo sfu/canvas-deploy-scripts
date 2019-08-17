@@ -123,6 +123,7 @@ create_release_dir() {
 extract_release() {
   printf "Extracting release tarball to relase directory: "
   tar -xf $RELEASE_TARBALL -C $INSTALL_DIR --owner="$ID" --group="$ID"
+  chmod -R 755 $INSTALL_DIR
   printf "done\n"
 }
 
